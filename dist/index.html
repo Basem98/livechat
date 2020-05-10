@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <title>ourChat</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      flex-direction: column;
+      width: 90vw;
+      background-color: #626f86;
+      margin-left: 3.5%;
+    }
+
+    .chatbox {
+      width: 70%;
+      height: 50%;
+      background-color: aliceblue;
+    }
+
+    .messages {
+      padding: 0.5em;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .msgContainer {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      position: relative;
+      width: 30%;
+      color: #FFFFFF;
+      margin-top: 0.5em;
+      margin-bottom: 0.5em;
+    }
+
+    .myMsgs {
+      border-radius: 0.5em 0 0 0.5em;
+      right: -70%;
+      background-color: rgb(44, 77, 44);
+      margin-top: 0.5em;
+    }
+
+    .theirMsgs {
+      border-radius: 0 0.5em 0.5em 0;
+      left: 0;
+      background-color: rgb(47, 47, 163);
+    }
+
+    .inputSender {
+      display: flex;
+      justify-content: center;
+      text-align: center;
+      flex-direction: row;
+      padding: 0.5em;
+    }
+
+    #sentMessage {
+      width: 90%;
+      text-overflow: ellipsis;
+      resize: none;
+
+    }
+
+    .sendMsg-btn {
+      padding: 1em;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="chatbox">
+    <div class="messages">
+      <h4>Chatbox</h4>
+    </div>
+    <div class="inputSender">
+      <textarea name="" id="sentMessage" rows="2"></textarea>
+      <button class="sendMsg-btn">Send</button>
+    </div>
+  </div>
+  <script src="socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    const sendMsg = document.querySelector('.sendMsg-btn');
+    const msgToSend = document.getElementsByTagName('textarea')[0];
+
+    function renderMsg(messageObj, msgAttribute) {
+      const chatbox = document.querySelector('.messages');
+      const newMsg = document.createElement('p');
+      const msgContent = document.createTextNode(messageObj.message);
+      const msgContainer = document.createElement('div');
+      newMsg.appendChild(msgContent);
+      msgContainer.setAttribute('class', msgAttribute + ' msgContainer');
+      msgContainer.appendChild(newMsg);
+      chatbox.appendChild(msgContainer);
+    };
+
+    sendMsg.addEventListener('click', () => {
+      if (!msgToSend.value) {
+        return; 
+      }
+      const messageObj = Object.create(null);
+      Object.defineProperties(messageObj, {
+        message: {
+          value: msgToSend.value
+        },
+        timestamp: {
+          value: (new Date).toUTCString()
+        }
+      });
+      renderMsg(messageObj, 'myMsgs');
+      socket.emit('message', messageObj.message);
+      msgToSend.value = "";
+    });
+
+    socket.on('message', (messageObj) => {
+      renderMsg(messageObj, 'theirMsgs');
+    });
+  </script>
+</body>
+
+</html>
