@@ -118,7 +118,7 @@
       });
       renderMsg(messageObj, 'myMsgs');
       socket.emit('message', messageObj.message);
-      msgToSend.value = "";
+      msgToSend.value = '';
     });
 
     socket.on('message', (messageObj) => {
